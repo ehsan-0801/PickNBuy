@@ -1,0 +1,209 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  VENDOR
+}
+
+enum VendorStatus {
+  PENDING
+  APPROVED
+  BLOCKED
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model User {
+  id              String      @id @default(uuid())
+  name            String
+  email           String      @unique
+  password        String
+  role            UserRole    @default(CUSTOMER)
+  profilePicture  String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  deletedAt       DateTime?
+  
+  vendor          Vendor?
+  carts           Cart[]
+  orders          Order[]
+  reviews         Review[]
+  addresses       Address[]
+  payments        Payment[]
+}
+
+model Vendor {
+  id              String      @id @default(uuid())
+  userId          String      @unique
+  storeName       String
+  storeDescription String?
+  storeLogo       String?
+  address         String?
+  phone           String?
+  status          VendorStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  deletedAt       DateTime?
+  
+  user            User        @relation(fields: [userId], references: [id])
+  products        Product[]
+  orderItems      OrderItem[]
+}
+
+model Category {
+  id              String      @id @default(uuid())
+  name            String      @unique
+  slug            String      @unique
+  icon            String?
+  
+  products        Product[]
+  subcategories   Subcategory[]
+}
+
+model Product {
+  id              String      @id @default(uuid())
+  vendorId        String
+  name            String
+  slug            String      @unique
+  description     String?
+  price           Decimal
+  discountPrice   Decimal?
+  stock           Int          @default(0)
+  categoryId      String?
+  subcategoryId   String?
+  status          ProductStatus @default(ACTIVE)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+
+  vendor          Vendor       @relation(fields: [vendorId], references: [id])
+  category        Category?    @relation(fields: [categoryId], references: [id])
+  subcategory     Subcategory? @relation(fields: [subcategoryId], references: [id])
+  images          ProductImage[]
+  carts           Cart[]
+  orderItems      OrderItem[]
+  reviews         Review[]
+}
+
+model Subcategory {
+  id              String      @id @default(uuid())
+  name            String
+  slug            String      @unique
+  categoryId      String
+  
+  category        Category    @relation(fields: [categoryId], references: [id])
+  products        Product[]
+}
+
+model ProductImage {
+  id              String      @id @default(uuid())
+  productId       String
+  imageUrl        String
+  
+  product         Product     @relation(fields: [productId], references: [id])
+}
+
+model Cart {
+  id              String      @id @default(uuid())
+  userId          String
+  productId       String
+  quantity        Int
+  
+  user            User        @relation(fields: [userId], references: [id])
+  product         Product     @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  userId          String
+  totalAmount     Decimal
+  paymentId       String?
+  shippingAddressId String?
+  status          OrderStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+  
+  user            User        @relation(fields: [userId], references: [id])
+  payment         Payment?    @relation(fields: [paymentId], references: [id])
+  shippingAddress Address?    @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  orderItems      OrderItem[]
+}
+
+model OrderItem {
+  id              String      @id @default(uuid())
+  orderId         String
+  productId       String
+  vendorId        String
+  quantity        Int
+  price           Decimal
+  
+  order           Order       @relation(fields: [orderId], references: [id])
+  product         Product     @relation(fields: [productId], references: [id])
+  vendor          Vendor      @relation(fields: [vendorId], references: [id])
+}
+
+model Review {
+  id              String      @id @default(uuid())
+  userId          String
+  productId       String
+  rating          Int
+  comment         String?
+  createdAt       DateTime    @default(now())
+  
+  user            User        @relation(fields: [userId], references: [id])
+  product         Product     @relation(fields: [productId], references: [id])
+}
+
+model Address {
+  id              String      @id @default(uuid())
+  userId          String
+  fullName        String
+  phone           String
+  addressLine1    String
+  addressLine2    String?
+  city            String
+  state           String
+  country         String
+  zipCode         String
+  
+  user            User        @relation(fields: [userId], references: [id])
+  shippingOrders  Order[]     @relation("ShippingAddress")
+}
+
+model Payment {
+  id              String      @id @default(uuid())
+  userId          String
+  paymentProvider String
+  paymentStatus   PaymentStatus @default(PENDING)
+  amount          Decimal
+  transactionId   String?
+  createdAt       DateTime    @default(now())
+  
+  user            User        @relation(fields: [userId], references: [id])
+  orders          Order[]
+}
