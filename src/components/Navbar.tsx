@@ -342,8 +342,14 @@ const Navbar = () => {
                 3
               </span>
             </Link>
+            <Link
+              href="/account"
+              className="hidden md:flex p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              <User size={20} />
+            </Link>
 
-            <DropdownMenu>
+            {/* <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <button className="hidden md:flex p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                   <User size={20} />
@@ -366,7 +372,7 @@ const Navbar = () => {
                   <Link href="/logout">Logout</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
 
             {/* Become a Seller Button */}
             <Link href="/vendor/register" className="hidden md:block">

@@ -9,10 +9,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  CUSTOMER
-  VENDOR
-}
+
 
 enum VendorStatus {
   PENDING
@@ -44,7 +41,7 @@ model User {
   name            String
   email           String      @unique
   password        String
-  role            UserRole    @default(CUSTOMER)
+  role            String      @default("user")
   profilePicture  String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt

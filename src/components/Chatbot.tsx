@@ -7,24 +7,34 @@ interface Message {
   id: number;
   text: string;
   isUser: boolean;
-  timestamp: Date;
+  timestamp: string; // Changed from Date to string
 }
 
-const INITIAL_MESSAGES: Message[] = [
-  {
-    id: 1,
-    text: "Hello! I'm your PickAndBuy assistant. How can I help you today?",
-    isUser: false,
-    timestamp: new Date(),
-  },
-];
+const INITIAL_BOT_MESSAGE = {
+  id: 1,
+  text: "Hello! I'm your PickAndBuy assistant. How can I help you today?",
+  isUser: false,
+  timestamp: "",
+};
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize messages after component mounts
+  useEffect(() => {
+    setMessages([
+      {
+        id: 1,
+        text: "Hello! I'm your PickAndBuy assistant. How can I help you today?",
+        isUser: false,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+  }, []);
 
   // Sample responses
   const sampleResponses = [
@@ -61,7 +71,7 @@ const Chatbot = () => {
       id: messages.length + 1,
       text: inputValue,
       isUser: true,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -77,7 +87,7 @@ const Chatbot = () => {
         id: messages.length + 2,
         text: randomResponse,
         isUser: false,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       };
 
       setMessages((prev) => [...prev, botMessage]);
@@ -85,7 +95,8 @@ const Chatbot = () => {
     }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
   };
 
-  const formatTime = (date: Date) => {
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
