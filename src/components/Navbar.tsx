@@ -28,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Image from "next/image";
 
 const themes = [
   { name: "Light", value: "light", icon: Sun },
@@ -135,9 +136,12 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <span className="text-xl md:text-2xl font-bold text-primary dark:text-white">
-                Pick<span className="text-brand-600">And</span>Buy
-              </span>
+              <Image
+                src="/pickandbuy.png"
+                alt="Logo"
+                width={120}
+                height={100}
+              />
             </Link>
           </div>
 
