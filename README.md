@@ -16,16 +16,14 @@ npm run dev
 
 This project is built with .
 
-- Vite
+- NextJs
 - TypeScript
 - React
 - shadcn-ui
-- Tailwind CSS
+- Tailwind CS
+- Prisma
+- PostgreSQL
 
-## How can I deploy this project?
+## What is the purpose of this project?
 
-Simply open [Lovable](https://lovable.dev/projects/09f6a6b9-dbce-4c49-aa32-e5e6d55c1b8b) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+This project is a e-commerce platform that allows users to buy products online. It has a user-friendly interface, secure payment processing, and a wide range of products to choose from.
