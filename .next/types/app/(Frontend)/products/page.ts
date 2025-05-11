@@ -1,8 +1,8 @@
-// File: G:\New developments\pickncommerce\src\app\(Frontend)\account\page.tsx
-import * as entry from '../../../../../src/app/(Frontend)/account/page.js'
+// File: G:\New developments\pickncommerce\src\app\(Frontend)\products\page.tsx
+import * as entry from '../../../../../src/app/(Frontend)/products/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../src/app/(Frontend)/account/page.js')
+type TEntry = typeof import('../../../../../src/app/(Frontend)/products/page.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{

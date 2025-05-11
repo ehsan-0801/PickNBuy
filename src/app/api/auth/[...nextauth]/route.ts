@@ -82,23 +82,77 @@ export const authOptions: NextAuthOptions = {
 
           if (!existingUser) {
             // Create a new user if they don't exist
-            await prisma.user.create({
+            const newUser = await prisma.user.create({
               data: {
                 email: user.email!,
                 name: user.name!,
                 password: "", // No password for OAuth users
                 role: "user", // Default role
                 profilePicture: user.image || "",
+                emailVerified: new Date(), // Set email as verified since it's Google OAuth
+                accounts: {
+                  create: {
+                    type: account.type,
+                    provider: account.provider,
+                    providerAccountId: account.providerAccountId,
+                    access_token: account.access_token,
+                    expires_at: account.expires_at,
+                    token_type: account.token_type,
+                    scope: account.scope,
+                    id_token: account.id_token,
+                  },
+                },
               },
             });
+
+            return true;
           } else {
-            // Optionally update the existing user's profile picture if using OAuth
+            // Update existing user with latest Google profile info
             await prisma.user.update({
               where: { email: user.email! },
               data: {
+                name: user.name!, // Update name in case it changed
                 profilePicture: user.image || existingUser.profilePicture,
+                emailVerified: existingUser.emailVerified || new Date(),
               },
             });
+
+            // Check if the user already has a Google account linked
+            const existingAccount = await prisma.account.findFirst({
+              where: {
+                userId: existingUser.id,
+                provider: "google",
+              },
+            });
+
+            // If no Google account is linked, create one
+            if (!existingAccount) {
+              await prisma.account.create({
+                data: {
+                  userId: existingUser.id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  access_token: account.access_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                },
+              });
+            } else {
+              // Update the existing account with new tokens
+              await prisma.account.update({
+                where: { id: existingAccount.id },
+                data: {
+                  access_token: account.access_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                },
+              });
+            }
           }
         } catch (error) {
           console.error("Error during OAuth sign-in:", error);

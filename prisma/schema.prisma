@@ -37,7 +37,7 @@ enum PaymentStatus {
 }
 
 model User {
-  id              String      @id @default(uuid())
+  id              Int         @id @default(autoincrement())
   name            String
   email           String      @unique
   password        String
@@ -46,6 +46,7 @@ model User {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   deletedAt       DateTime?
+  emailVerified   DateTime?
   
   vendor          Vendor?
   carts           Cart[]
@@ -53,11 +54,12 @@ model User {
   reviews         Review[]
   addresses       Address[]
   payments        Payment[]
+  accounts        Account[]
 }
 
 model Vendor {
-  id              String      @id @default(uuid())
-  userId          String      @unique
+  id              Int         @id @default(autoincrement())
+  userId          Int         @unique
   storeName       String
   storeDescription String?
   storeLogo       String?
@@ -74,7 +76,7 @@ model Vendor {
 }
 
 model Category {
-  id              String      @id @default(uuid())
+  id              Int         @id @default(autoincrement())
   name            String      @unique
   slug            String      @unique
   icon            String?
@@ -84,16 +86,16 @@ model Category {
 }
 
 model Product {
-  id              String      @id @default(uuid())
-  vendorId        String
+  id              Int      @id @default(autoincrement())
+  vendorId        Int
   name            String
   slug            String      @unique
   description     String?
   price           Decimal
   discountPrice   Decimal?
   stock           Int          @default(0)
-  categoryId      String?
-  subcategoryId   String?
+  categoryId      Int?
+  subcategoryId   Int?
   status          ProductStatus @default(ACTIVE)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -109,27 +111,27 @@ model Product {
 }
 
 model Subcategory {
-  id              String      @id @default(uuid())
+  id              Int      @id @default(autoincrement())  
   name            String
   slug            String      @unique
-  categoryId      String
+  categoryId      Int
   
   category        Category    @relation(fields: [categoryId], references: [id])
   products        Product[]
 }
 
 model ProductImage {
-  id              String      @id @default(uuid())
-  productId       String
+  id              Int      @id @default(autoincrement())
+  productId       Int
   imageUrl        String
   
   product         Product     @relation(fields: [productId], references: [id])
 }
 
 model Cart {
-  id              String      @id @default(uuid())
-  userId          String
-  productId       String
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  productId       Int
   quantity        Int
   
   user            User        @relation(fields: [userId], references: [id])
@@ -137,11 +139,11 @@ model Cart {
 }
 
 model Order {
-  id              String      @id @default(uuid())
-  userId          String
+  id              Int      @id @default(autoincrement())
+  userId          Int
   totalAmount     Decimal
-  paymentId       String?
-  shippingAddressId String?
+  paymentId       Int?
+  shippingAddressId Int?
   status          OrderStatus @default(PENDING)
   createdAt       DateTime    @default(now())
   
@@ -152,10 +154,10 @@ model Order {
 }
 
 model OrderItem {
-  id              String      @id @default(uuid())
-  orderId         String
-  productId       String
-  vendorId        String
+  id              Int      @id @default(autoincrement())
+  orderId         Int
+  productId       Int
+  vendorId        Int
   quantity        Int
   price           Decimal
   
@@ -165,9 +167,9 @@ model OrderItem {
 }
 
 model Review {
-  id              String      @id @default(uuid())
-  userId          String
-  productId       String
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  productId       Int
   rating          Int
   comment         String?
   createdAt       DateTime    @default(now())
@@ -177,8 +179,8 @@ model Review {
 }
 
 model Address {
-  id              String      @id @default(uuid())
-  userId          String
+  id              Int      @id @default(autoincrement())
+  userId          Int
   fullName        String
   phone           String
   addressLine1    String
@@ -193,8 +195,8 @@ model Address {
 }
 
 model Payment {
-  id              String      @id @default(uuid())
-  userId          String
+  id              Int      @id @default(autoincrement())
+  userId          Int
   paymentProvider String
   paymentStatus   PaymentStatus @default(PENDING)
   amount          Decimal
@@ -203,4 +205,23 @@ model Payment {
   
   user            User        @relation(fields: [userId], references: [id])
   orders          Order[]
+}
+
+model Account {
+  id                Int       @id @default(autoincrement())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?   @db.Text
+  access_token      String?   @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?   @db.Text
+  session_state     String?
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
 }

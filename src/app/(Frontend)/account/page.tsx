@@ -15,6 +15,7 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 // Define Zod schemas for validation
 const loginSchema = z.object({
@@ -148,21 +149,76 @@ const AccountPage = () => {
     }
   };
 
-  const handleSignupSubmit = (e: React.FormEvent) => {
+  const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateSignup()) {
-      console.log("Signup form submitted:", signupFormData);
-      // Handle signup logic here
+      try {
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: signupFormData.name,
+            email: signupFormData.email,
+            password: signupFormData.password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 409) {
+            setErrors({ email: data.message });
+          } else if (response.status === 400 && data.errors) {
+            const newErrors: Record<string, string> = {};
+            data.errors.forEach((err: { path: string[]; message: string }) => {
+              if (err.path[0]) {
+                newErrors[err.path[0].toString()] = err.message;
+              }
+            });
+            setErrors(newErrors);
+          } else {
+            setErrors({ submit: data.message || "Registration failed" });
+          }
+          return;
+        }
+
+        // Clear form and errors
+        setSignupFormData({
+          name: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+        });
+        setErrors({});
+
+        // Switch to login form
+        setIsSignUp(false);
+
+        // Show success message
+        // You might want to add a toast notification system here
+        alert("Registration successful! Please sign in.");
+      } catch (error) {
+        console.error("Registration error:", error);
+        setErrors({ submit: "An error occurred during registration" });
+      }
     }
   };
 
-  const handleGoogleAuth = () => {
-    console.log("Google Auth clicked");
-    // Handle Google authentication logic here
+  const handleGoogleAuth = async () => {
+    try {
+      await signIn("google", {
+        callbackUrl: "/", // Redirect to home page after successful sign in
+      });
+    } catch (error) {
+      console.error("Google authentication error:", error);
+      setErrors({ submit: "Failed to authenticate with Google" });
+    }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-gray-900 dark:to-indigo-950 px-4 py-10 my-16">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-gray-900 dark:to-indigo-950 px-4 py-10 my-12 ">
       <div className="w-full max-w-md overflow-hidden relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
         {/* Enhanced decorative elements */}
         <div className="absolute top-0 left-0 w-40 h-40 bg-indigo-600 dark:bg-indigo-500 rounded-br-full opacity-10"></div>
@@ -240,7 +296,7 @@ const AccountPage = () => {
             {/* Forms with sliding effect */}
             <div
               className="w-full relative overflow-hidden"
-              style={{ minHeight: "380px" }}
+              style={{ minHeight: isSignUp ? "320px" : "250px" }}
             >
               {/* Login Form */}
               <div
@@ -423,7 +479,7 @@ const AccountPage = () => {
             </div>
 
             {/* Google Auth Button */}
-            <div className="my-6 w-full">
+            <div className="my-1 w-full">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
