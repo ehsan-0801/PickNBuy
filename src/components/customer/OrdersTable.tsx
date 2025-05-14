@@ -1,0 +1,174 @@
+import Link from "next/link"
+import { Clock, CheckCircle, Truck, Package, XCircle, Eye } from "lucide-react"
+
+export default function OrdersTable() {
+  const orders = [
+    {
+      id: "ORD-12345",
+      date: "May 10, 2025",
+      total: 249.97,
+      status: "delivered",
+      items: 3,
+      products: ["Wireless Noise-Cancelling Headphones", "Smart Fitness Watch", "Organic Cotton T-Shirt"],
+    },
+    {
+      id: "ORD-12344",
+      date: "May 5, 2025",
+      total: 89.99,
+      status: "shipped",
+      items: 1,
+      products: ["Smart Fitness Watch"],
+    },
+    {
+      id: "ORD-12343",
+      date: "Apr 28, 2025",
+      total: 129.99,
+      status: "processing",
+      items: 2,
+      products: ["Portable Bluetooth Speaker", "Wireless Charging Pad"],
+    },
+    {
+      id: "ORD-12342",
+      date: "Apr 15, 2025",
+      total: 59.99,
+      status: "delivered",
+      items: 1,
+      products: ["Smart LED Light Bulb"],
+    },
+    {
+      id: "ORD-12341",
+      date: "Apr 3, 2025",
+      total: 79.99,
+      status: "cancelled",
+      items: 1,
+      products: ["Professional Kitchen Knife Set"],
+    },
+    {
+      id: "ORD-12340",
+      date: "Mar 27, 2025",
+      total: 149.99,
+      status: "delivered",
+      items: 1,
+      products: ["Wireless Noise-Cancelling Headphones"],
+    },
+    {
+      id: "ORD-12339",
+      date: "Mar 15, 2025",
+      total: 64.98,
+      status: "delivered",
+      items: 2,
+      products: ["Stainless Steel Water Bottle", "Yoga Mat"],
+    },
+  ]
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "processing":
+        return <Clock className="h-5 w-5 text-amber-500" />
+      case "shipped":
+        return <Truck className="h-5 w-5 text-blue-500" />
+      case "delivered":
+        return <CheckCircle className="h-5 w-5 text-green-500" />
+      case "cancelled":
+        return <XCircle className="h-5 w-5 text-red-500" />
+      default:
+        return <Package className="h-5 w-5 text-gray-500" />
+    }
+  }
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case "processing":
+        return "Processing"
+      case "shipped":
+        return "Shipped"
+      case "delivered":
+        return "Delivered"
+      case "cancelled":
+        return "Cancelled"
+      default:
+        return "Unknown"
+    }
+  }
+
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "processing":
+        return "bg-amber-100 text-amber-800"
+      case "shipped":
+        return "bg-blue-100 text-blue-800"
+      case "delivered":
+        return "bg-green-100 text-green-800"
+      case "cancelled":
+        return "bg-red-100 text-red-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Order ID
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Date
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Products
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Total
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Status
+            </th>
+            <th scope="col" className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200 bg-white">
+          {orders.map((order) => (
+            <tr key={order.id} className="hover:bg-gray-50">
+              <td className="whitespace-nowrap px-6 py-4">
+                <div className="text-sm font-medium text-gray-900">{order.id}</div>
+              </td>
+              <td className="whitespace-nowrap px-6 py-4">
+                <div className="text-sm text-gray-500">{order.date}</div>
+              </td>
+              <td className="px-6 py-4">
+                <div className="text-sm text-gray-900 line-clamp-1">{order.products.join(", ")}</div>
+                <div className="text-xs text-gray-500">{order.items} item(s)</div>
+              </td>
+              <td className="whitespace-nowrap px-6 py-4">
+                <div className="text-sm font-medium text-gray-900">${order.total.toFixed(2)}</div>
+              </td>
+              <td className="whitespace-nowrap px-6 py-4">
+                <div className="flex items-center">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusClass(
+                      order.status,
+                    )}`}
+                  >
+                    {getStatusIcon(order.status)}
+                    <span className="ml-1">{getStatusText(order.status)}</span>
+                  </span>
+                </div>
+              </td>
+              <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                <Link href={`/customer/orders/${order.id}`} className="text-blue-600 hover:text-blue-900">
+                  <Eye className="h-4 w-4" />
+                  <span className="sr-only">View Order</span>
+                </Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

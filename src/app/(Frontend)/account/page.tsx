@@ -16,6 +16,7 @@ import {
   Sun,
 } from "lucide-react";
 import { signIn } from "next-auth/react";
+import { toast } from "@/hooks/use-toast";
 
 // Define Zod schemas for validation
 const loginSchema = z.object({
@@ -141,11 +142,56 @@ const AccountPage = () => {
     }
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateLogin()) {
-      console.log("Login form submitted:", loginFormData);
-      // Handle login logic here
+      try {
+        const result = await signIn("credentials", {
+          email: loginFormData.email,
+          password: loginFormData.password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          setErrors({ submit: "Invalid email or password" });
+          toast({
+            title: "Login Failed",
+            description: "Invalid email or password. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        } // Success - show toast and trigger animation
+        setAnimationStep(3); // Trigger success animation
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+        });
+
+        // Get the session to check user role
+        const session = await fetch("/api/auth/session");
+        const userData = await session.json();
+
+        // Determine redirect URL based on role
+        const redirectUrl =
+          userData?.user?.role === "admin"
+            ? "/admin"
+            : userData?.user?.role === "vendor"
+            ? "/vendor"
+            : "/";
+
+        // Redirect after a short delay to show animation
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 1000);
+      } catch (error) {
+        console.error("Login error:", error);
+        setErrors({ submit: "An error occurred during login" });
+        toast({
+          title: "Login Error",
+          description: "An unexpected error occurred. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -194,11 +240,11 @@ const AccountPage = () => {
         setErrors({});
 
         // Switch to login form
-        setIsSignUp(false);
-
-        // Show success message
-        // You might want to add a toast notification system here
-        alert("Registration successful! Please sign in.");
+        setIsSignUp(false); // Show success message
+        toast({
+          title: "Registration Successful",
+          description: "Your account has been created. Please sign in.",
+        });
       } catch (error) {
         console.error("Registration error:", error);
         setErrors({ submit: "An error occurred during registration" });
