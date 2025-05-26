@@ -101,10 +101,6 @@ export default function SalesChart() {
             },
             y: {
               beginAtZero: true,
-              grid: {
-                dash: [2, 4],
-                drawBorder: false,
-              },
               ticks: {
                 callback: (value) => "$" + value,
               },

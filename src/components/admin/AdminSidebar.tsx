@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   Home,
   Users,
@@ -10,6 +11,7 @@ import {
   Tag,
   Settings,
   X,
+  LogOut,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -32,6 +34,10 @@ export default function AdminSidebar({
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
+  const handleSignOut = async () => {
+    await signOut({ redirect: true, callbackUrl: "/account" });
+  };
+
   return (
     <>
       {/* Desktop sidebar */}
@@ -41,9 +47,9 @@ export default function AdminSidebar({
             <Image
               src="/pickandbuy.png"
               alt="Logo"
-              width={32}
-              height={32}
-              className="h-8 w-auto"
+              width={40}
+              height={40}
+              className="h-20 w-20"
             />
             <span className="ml-2 text-xl font-bold text-gray-900">
               PickAndBuy
@@ -75,6 +81,16 @@ export default function AdminSidebar({
                 );
               })}
             </nav>
+            {/* Desktop Sign Out Button */}
+            <div className="border-t border-gray-200 p-4">
+              <button
+                onClick={handleSignOut}
+                className="group flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+              >
+                <LogOut className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500" />
+                Sign Out
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -118,32 +134,44 @@ export default function AdminSidebar({
             <X className="h-6 w-6" />
           </button>
         </div>
-        <nav className="flex-1 space-y-1 px-4 py-4">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                }`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <item.icon
-                  className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${
+        <div className="flex flex-1 flex-col h-[calc(100vh-4rem)]">
+          <nav className="flex-1 space-y-1 px-4 py-4">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? "text-blue-600"
-                      : "text-gray-400 group-hover:text-gray-500"
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                   }`}
-                />
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <item.icon
+                    className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${
+                      isActive
+                        ? "text-blue-600"
+                        : "text-gray-400 group-hover:text-gray-500"
+                    }`}
+                  />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </nav>
+          {/* Mobile Sign Out Button */}
+          <div className="border-t border-gray-200 p-4 mt-auto">
+            <button
+              onClick={handleSignOut}
+              className="group flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+            >
+              <LogOut className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500" />
+              Sign Out
+            </button>
+          </div>
+        </div>
       </div>
     </>
   );

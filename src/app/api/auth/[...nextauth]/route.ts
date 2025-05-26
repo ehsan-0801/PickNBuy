@@ -198,9 +198,14 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // Always redirect to /account for sign-in
+      return "/account";
+    },
   },
   pages: {
-    signIn: "/login",
+    signIn: "/account",
+    error: "/account",
   },
   session: {
     strategy: "jwt",

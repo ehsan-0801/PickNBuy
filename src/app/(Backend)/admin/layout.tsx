@@ -4,23 +4,27 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { SessionProvider } from "next-auth/react";
 import { type ReactNode, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import ProtectedLayout from "@/app/context/ProtectedLayout";
+import { AuthProvider } from "@/app/context/AuthContext";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
 
-  // Handle responsive sidebar behavior and body scroll
+  // Redirect if not authenticated
+
+  // Handle responsive sidebar behavior
   useEffect(() => {
     const handleResize = () => {
-      // On desktop (>= 1024px), we ignore the sidebarOpen state as it's always visible
       if (window.innerWidth >= 1024) {
         document.body.style.overflow = "";
       } else {
-        // On mobile, we update the body overflow based on the sidebar state
         document.body.style.overflow = sidebarOpen ? "hidden" : "";
       }
     };
 
-    handleResize(); // Call initially
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -29,26 +33,27 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }, [sidebarOpen]);
 
   const toggleSidebar = () => {
-    console.log("Sidebar toggled");
     setSidebarOpen((prev) => !prev);
   };
 
   return (
     <html lang="en">
-      <body>
+      <body suppressHydrationWarning>
         <SessionProvider>
-          <div className="min-h-screen bg-gray-50">
-            <AdminSidebar
-              sidebarOpen={sidebarOpen}
-              setSidebarOpen={setSidebarOpen}
-            />
-
-            {/* Main content */}
-            <div className="flex flex-1 flex-col lg:pl-64">
-              <AdminHeader toggleSidebar={toggleSidebar} />
-              <main className="flex-1 p-6">{children}</main>
-            </div>
-          </div>
+          <AuthProvider>
+            <ProtectedLayout requiredRole="admin">
+              <div className="min-h-screen bg-gray-50">
+                <AdminSidebar
+                  sidebarOpen={sidebarOpen}
+                  setSidebarOpen={setSidebarOpen}
+                />
+                <div className="flex flex-1 flex-col lg:pl-64">
+                  <AdminHeader toggleSidebar={toggleSidebar} />
+                  <main className="flex-1 p-6">{children}</main>
+                </div>
+              </div>
+            </ProtectedLayout>
+          </AuthProvider>
         </SessionProvider>
       </body>
     </html>

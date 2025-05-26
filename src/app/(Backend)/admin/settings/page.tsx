@@ -222,7 +222,7 @@ export default function SettingsPage() {
                     <div className="mt-2 flex items-center">
                       <div className="h-10 w-10 overflow-hidden rounded-md border border-gray-300">
                         <Image
-                          src="/placeholder.svg?height=40&width=40"
+                          src=""
                           alt="Favicon"
                           width={40}
                           height={40}

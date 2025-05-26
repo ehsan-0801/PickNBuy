@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { z } from "zod";
 import {
   Mail,
@@ -15,8 +15,9 @@ import {
   Moon,
   Sun,
 } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 // Define Zod schemas for validation
 const loginSchema = z.object({
@@ -55,6 +56,28 @@ const AccountPage = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [animationStep, setAnimationStep] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const router = useRouter();
+
+  // Check if the user is already authenticated then redirect to user role dashboard
+  useEffect(() => {
+    const checkAuth = async () => {
+      const session = await getSession();
+      const userData = session?.user;
+
+      if (userData?.role) {
+        // User is authenticated, redirect based on role
+        const redirectUrl =
+          userData.role === "admin"
+            ? "/admin"
+            : userData.role === "vendor"
+            ? "/vendor"
+            : "/user";
+        router.push(redirectUrl);
+      }
+    };
+
+    checkAuth();
+  });
 
   // Login form state
   const [loginFormData, setLoginFormData] = useState<LoginFormData>({
